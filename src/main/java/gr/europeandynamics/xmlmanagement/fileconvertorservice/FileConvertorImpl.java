@@ -3,20 +3,25 @@ package gr.europeandynamics.xmlmanagement.fileconvertorservice;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import lombok.extern.slf4j.Slf4j;
 
-public class ConvertTXTToXML implements FileConvertor {
+@Slf4j
+public class FileConvertorImpl implements FileConvertor {
 
     private int paragraphCount = 0;
     private int sentenceCount = 0;
@@ -76,31 +81,7 @@ public class ConvertTXTToXML implements FileConvertor {
 
             xmlWriter.writeEndElement();
 
-            xmlWriter.writeStartElement("statistics");
-
-            xmlWriter.writeStartElement("numberOfParagraphs");
-            xmlWriter.writeCharacters(String.valueOf(paragraphCount));
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("numberOfSentences");
-            xmlWriter.writeCharacters(String.valueOf(sentenceCount));
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("numberOfWords");
-            xmlWriter.writeCharacters(String.valueOf(wordCount));
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("numberOfDistinctWords");
-            xmlWriter.writeCharacters(String.valueOf(uniqueWords.size()));
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("dateTime");
-            xmlWriter.writeCharacters(LocalDateTime.now().toString());
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("author");
-            xmlWriter.writeCharacters("Stavroula Bakogianni");
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement("applicationName");
-            xmlWriter.writeCharacters("XML Management Application");
-            xmlWriter.writeEndElement();
-
-            xmlWriter.writeEndElement();
+            writeStatistics(xmlWriter);
 
             xmlWriter.writeEndElement();
 
@@ -108,20 +89,64 @@ public class ConvertTXTToXML implements FileConvertor {
             xmlWriter.flush();
             xmlWriter.close();
 
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            StreamSource xmlSource = new StreamSource(new StringReader(stringWriter.toString()));
-            StreamResult result = new StreamResult(new FileWriter(xmlFilePath));
-            transformer.transform(xmlSource, result);
-            
+            writeXmlToFile(xmlFilePath, stringWriter);
+
+           
+          log.info("File conversion completed successfully.");
             return true;
-        } catch (Exception e) {
-            // use logs later
-            System.err.println("Error reading the file: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("Error reading or writing the file: {}", e.getMessage(), e);
+            return false;
+        } catch (XMLStreamException e) {
+            log.error("Error generating the XML: {}", e.getMessage(), e);
+            return false;
+        } catch (TransformerException e) {
+            log.error("Error transforming the XML: {}", e.getMessage(), e);
             return false;
         }
+    }
 
+    private void writeStatistics(XMLStreamWriter xmlWriter) throws XMLStreamException {
+        xmlWriter.writeStartElement("statistics");
+
+        xmlWriter.writeStartElement("numberOfParagraphs");
+        xmlWriter.writeCharacters(String.valueOf(paragraphCount));
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("numberOfSentences");
+        xmlWriter.writeCharacters(String.valueOf(sentenceCount));
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("numberOfWords");
+        xmlWriter.writeCharacters(String.valueOf(wordCount));
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("numberOfDistinctWords");
+        xmlWriter.writeCharacters(String.valueOf(uniqueWords.size()));
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("dateTime");
+        xmlWriter.writeCharacters(LocalDateTime.now().toString());
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("author");
+        xmlWriter.writeCharacters("Stavroula Bakogianni");
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("applicationName");
+        xmlWriter.writeCharacters("XML Management Application");
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeEndElement();
+    }
+
+    private void writeXmlToFile(String xmlFilePath, StringWriter stringWriter) throws TransformerException, IOException {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        StreamSource xmlSource = new StreamSource(new StringReader(stringWriter.toString()));
+        StreamResult result = new StreamResult(new FileWriter(xmlFilePath));
+        transformer.transform(xmlSource, result);
     }
 }

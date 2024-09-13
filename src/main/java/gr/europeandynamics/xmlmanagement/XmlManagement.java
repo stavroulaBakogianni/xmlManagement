@@ -1,15 +1,16 @@
 package gr.europeandynamics.xmlmanagement;
 
-import gr.europeandynamics.xmlmanagement.fileconvertorservice.ConvertTXTToXML;
+import gr.europeandynamics.xmlmanagement.fileconvertorservice.FileConvertorImpl;
+
 import java.io.IOException;
 
 public class XmlManagement {
 
     public static void main(String[] args) throws IOException {
 
-        ConvertTXTToXML txtParser = new ConvertTXTToXML();
+        FileConvertorImpl fileConvertor = new FileConvertorImpl();
 
-        txtParser.convertFile("txt_files/sample-lorem-ipsum-text-file.txt","xml_files/book.xml");
+        fileConvertor.convertFile("txt_files/sample-lorem-ipsum-text-file.txt", "xml_files/book.xml");
+
     }
-
 }
