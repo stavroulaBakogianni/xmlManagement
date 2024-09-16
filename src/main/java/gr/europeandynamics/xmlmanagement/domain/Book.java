@@ -2,16 +2,15 @@ package gr.europeandynamics.xmlmanagement.domain;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @XmlRootElement(name = "book")
 public class Book {
 
-    List<Chapter> chapters;
+    List<Chapter> chapters = new ArrayList<>();
     Statistics statistics;
 
     @XmlElement(name = "chapter")
@@ -22,5 +21,13 @@ public class Book {
     @XmlElement(name = "statistics")
     public Statistics getStatistics() {
         return this.statistics;
+    }
+
+    public void addChapter(Chapter chapter) {
+        chapters.add(chapter);
+    }
+
+    public int getNumberofChapters() {
+        return this.chapters.size();
     }
 }
