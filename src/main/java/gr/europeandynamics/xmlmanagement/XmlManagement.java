@@ -24,6 +24,7 @@ public class XmlManagement {
         XmlManipulator xmlManipulator = new XmlManipulatorImpl();
         xmlManipulator.readXml(xmlFileName);
         xmlManipulator.writeXml(xmlFragmentFileName, 5, 8);
+        xmlManipulator.calculateStatistics();
     }
 
 }
