@@ -28,7 +28,7 @@ public class FileConvertorImpl implements FileConvertor {
     private int chapterCount = 0;
     private int wordCount = 0;
     private Set<String> uniqueWords = new HashSet<>();
-
+    final String regex = "[\\p{Punct}]";
     private static final int PARAGRAPHS_PER_CHAPTER = 20;
 
     @Override
@@ -63,7 +63,8 @@ public class FileConvertorImpl implements FileConvertor {
 
                             for (String word : words) {
                                 wordCount++;
-                                uniqueWords.add(word.toLowerCase());
+                                String wordWithoutPunctuation = word.replaceAll(regex, "");
+                                uniqueWords.add(wordWithoutPunctuation.toLowerCase());
                             }
                         }
                     }
@@ -90,9 +91,7 @@ public class FileConvertorImpl implements FileConvertor {
             xmlWriter.close();
 
             writeXmlToFile(xmlFilePath, stringWriter);
-
-           
-          log.info("File conversion completed successfully.");
+            log.info("File conversion completed successfully.");
             return true;
         } catch (IOException e) {
             log.error("Error reading or writing the file: {}", e.getMessage(), e);
