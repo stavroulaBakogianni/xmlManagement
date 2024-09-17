@@ -5,13 +5,14 @@ import gr.europeandynamics.xmlmanagement.domain.Paragraph;
 import gr.europeandynamics.xmlmanagement.domain.Sentence;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -34,6 +35,11 @@ public class XmlManipulatorImpl implements XmlManipulator {
     private List<Chapter> chapters = new ArrayList<>();
     private Paragraph currentParagraph = null;
     private Chapter currentChapter = null;
+    private int numberOfParagraphsXml = 0;
+    private int numberOfSentencesXml = 0;
+    private int numberOfWordsXml = 0;
+    private int numberOfDistinctWordsXml = 0;
+    private final String regex = "[\\p{Punct}]";
 
     @Override
     public void readXml(String fileName) {
@@ -56,7 +62,6 @@ public class XmlManipulatorImpl implements XmlManipulator {
                             currentParagraph = new Paragraph();
                             break;
                         case "sentence":
-
                             event = eventReader.nextEvent();
                             if (event instanceof Characters) {
                                 String content = event.asCharacters().getData().trim();
@@ -66,6 +71,32 @@ public class XmlManipulatorImpl implements XmlManipulator {
                                         currentParagraph.addSentence(sentence);
                                     }
                                 }
+                            }
+                            break;
+                        case "statistics":
+                            break;
+                        case "numberOfParagraphs":
+                            event = eventReader.nextEvent();
+                            if (event instanceof Characters) {
+                                numberOfParagraphsXml = Integer.parseInt(event.asCharacters().getData().trim());
+                            }
+                            break;
+                        case "numberOfSentences":
+                            event = eventReader.nextEvent();
+                            if (event instanceof Characters) {
+                                numberOfSentencesXml = Integer.parseInt(event.asCharacters().getData().trim());
+                            }
+                            break;
+                        case "numberOfWords":
+                            event = eventReader.nextEvent();
+                            if (event instanceof Characters) {
+                                numberOfWordsXml = Integer.parseInt(event.asCharacters().getData().trim());
+                            }
+                            break;
+                        case "numberOfDistinctWords":
+                            event = eventReader.nextEvent();
+                            if (event instanceof Characters) {
+                                numberOfDistinctWordsXml = Integer.parseInt(event.asCharacters().getData().trim());
                             }
                             break;
                     }
@@ -140,7 +171,7 @@ public class XmlManipulatorImpl implements XmlManipulator {
 
                 writer.writeEndElement();
             }
-            
+
             writer.writeEndElement();
             writer.writeEndDocument();
             writer.flush();
@@ -160,5 +191,39 @@ public class XmlManipulatorImpl implements XmlManipulator {
         StreamSource xmlSource = new StreamSource(new StringReader(stringWriter.toString()));
         StreamResult result = new StreamResult(new FileWriter(xmlFilePath));
         transformer.transform(xmlSource, result);
+
+    }
+
+    @Override
+    public void calculateStatistics() {
+        int numberOfParagraphs = 0;
+        int numberOfSentences = 0;
+        int numberOfWords = 0;
+        Set<String> distinctWords = new HashSet<>();
+
+        for (Chapter chapter : chapters) {
+            numberOfParagraphs += chapter.getParagraphs().size();
+            for (Paragraph paragraph : chapter.getParagraphs()) {
+                numberOfSentences += paragraph.getSentences().size();
+                for (Sentence sentence : paragraph.getSentences()) {
+                    String[] words = sentence.getContent().split("\\s+");
+                    numberOfWords += words.length;
+                    for (String word : words) {
+                        String wordWithoutPunctuation = word.replaceAll(regex, "");
+                        distinctWords.add(wordWithoutPunctuation.toLowerCase());
+                    }
+                }
+            }
+        }
+        
+        int numberOfDistinctWords = distinctWords.size();
+
+        log.info("Calculated Statistics: Paragraphs={}, Sentences={}, Words={}, DistinctWords={}",
+                numberOfParagraphs, numberOfSentences, numberOfWords, numberOfDistinctWords);
+        log.info("Comparison with XML Statistics: ");
+        log.info("Paragraphs (XML/Calculated): {}/{}", numberOfParagraphsXml, numberOfParagraphs);
+        log.info("Sentences (XML/Calculated): {}/{}", numberOfSentencesXml, numberOfSentences);
+        log.info("Words (XML/Calculated): {}/{}", numberOfWordsXml, numberOfWords);
+        log.info("Distinct Words (XML/Calculated): {}/{}", numberOfDistinctWordsXml, numberOfDistinctWords);
     }
 }
