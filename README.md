@@ -31,7 +31,7 @@ The **XML Management Application** is a Java-based project designed to facilitat
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-repo/xml-management-application.git
+   git clone https://github.com/stavroulaBakogianni/xmlManagement.git
    cd xml-management-application
 
 2. **Build the project**:
