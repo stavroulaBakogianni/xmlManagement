@@ -31,6 +31,16 @@ public class FileConvertorImpl implements FileConvertor {
     final String regex = "[\\p{Punct}]";
     private static final int PARAGRAPHS_PER_CHAPTER = 20;
 
+    /**
+     * Converts a given text file to an XML file, organizing content into
+     * chapters, paragraphs, and sentences. Additionally, it calculates and
+     * includes statistics such as the number of paragraphs, sentences, words,
+     * and distinct words.
+     *
+     * @param txtFilePath
+     * @param xmlFilePath
+     * @return true if the conversion is successful, false otherwise.
+     */
     @Override
     public boolean convertFile(String txtFilePath, String xmlFilePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(txtFilePath))) {
@@ -105,6 +115,14 @@ public class FileConvertorImpl implements FileConvertor {
         }
     }
 
+    /**
+     * Writes statistics such as the number of paragraphs, sentences, words,
+     * distinct words, the current date/time, the author, and the application
+     * name to the XML output.
+     *
+     * @param xmlWriter The XMLStreamWriter object used to write the XML data.
+     * @throws XMLStreamException
+     */
     private void writeStatistics(XMLStreamWriter xmlWriter) throws XMLStreamException {
         xmlWriter.writeStartElement("statistics");
 
@@ -139,6 +157,15 @@ public class FileConvertorImpl implements FileConvertor {
         xmlWriter.writeEndElement();
     }
 
+    /**
+     * Transforms the in-memory XML content and writes it to a file. The XML
+     * content is formatted with indentation for better readability.
+     *
+     * @param xmlFilePath The file path where the XML will be saved.
+     * @param stringWriter The StringWriter containing the XML data to be written.
+     * @throws TransformerException
+     * @throws IOException
+     */
     private void writeXmlToFile(String xmlFilePath, StringWriter stringWriter) throws TransformerException, IOException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();

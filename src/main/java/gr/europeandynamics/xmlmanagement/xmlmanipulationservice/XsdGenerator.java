@@ -17,6 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class XsdGenerator {
 
+    /**
+     * Generates an XSD schema file based on the JAXB-annotated Java classes
+     * such as Book, Chapter, Paragraph, Sentence, and Statistics.
+     *
+     * @param xsdFileName The name of the XSD file to be generated.
+     */
     public static void xsdGenerator(String xsdFileName) {
         try {
             JAXBContext context = JAXBContext.newInstance(Book.class, Chapter.class, Paragraph.class, Sentence.class, Statistics.class);
@@ -28,6 +34,10 @@ public class XsdGenerator {
         }
     }
 
+    /**
+     * Custom SchemaOutputResolver class that specifies where to write the
+     * generated XSD schema file.
+     */
     static class MySchemaOutputResolver extends SchemaOutputResolver {
 
         private final String xsdFileName;
@@ -36,6 +46,14 @@ public class XsdGenerator {
             this.xsdFileName = xsdFileName;
         }
 
+        /**
+         * Creates the output for the XSD file.
+         *
+         * @param namespaceUri The namespaace URI for the XML schema.
+         * @param suggestedFileName Suggested file name for the schema file.
+         * @return A Result that contains the system ID of the output file.
+         * @throws IOException If there is an issue creating the file.
+         */
         @Override
         public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
             File file = new File(xsdFileName);

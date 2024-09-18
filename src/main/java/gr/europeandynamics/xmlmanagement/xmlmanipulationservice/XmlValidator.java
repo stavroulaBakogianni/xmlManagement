@@ -17,11 +17,15 @@ import org.xml.sax.SAXException;
 
 @Slf4j
 public class XmlValidator {
-/**
- * 
- * @param xmlFileName
- * @param xsdFileName 
- */
+
+    /**
+     * Validates the structure and content of an XML file against the provided
+     * XSD schema. The XML file is unmarshalled into Java objects, and the
+     * validation occurs based on the schema.
+     *
+     * @param xmlFileName The path to the XML file that needs to be validated.
+     * @param xsdFileName The path to the XSD file that defines the XML schema.
+     */
     public static void xmlValidator(String xmlFileName, String xsdFileName) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Book.class, Chapter.class, Paragraph.class, Sentence.class, Statistics.class);

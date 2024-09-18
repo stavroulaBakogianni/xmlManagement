@@ -41,6 +41,12 @@ public class XmlManipulatorImpl implements XmlManipulator {
     private int numberOfDistinctWordsXml = 0;
     private final String regex = "[\\p{Punct}]";
 
+    /**
+     * Reads and parses an XML file, storing the content into internal
+     * structures such as chapters, paragraphs, and sentences.
+     *
+     * @param fileName The path of the XML file to read.
+     */
     @Override
     public void readXml(String fileName) {
         try {
@@ -125,6 +131,14 @@ public class XmlManipulatorImpl implements XmlManipulator {
         }
     }
 
+    /**
+     * Writes a fragment of the XML content (based on a specified chapter range)
+     * into a new XML file.
+     *
+     * @param fileName The path where the XML fragment will be saved.
+     * @param startChapter The starting chapter number to include in the output.
+     * @param endChapter The ending chapter number to include in the output.
+     */
     @Override
     public void writeXml(String fileName, int startChapter, int endChapter) {
         List<Chapter> fragmentChapters = chapters.subList(startChapter, endChapter);
@@ -183,6 +197,16 @@ public class XmlManipulatorImpl implements XmlManipulator {
         }
     }
 
+    /**
+     * Pretty prints and writes the XML content to a file, ensuring correct
+     * indentation and formatting.
+     *
+     * @param xmlFilePath The path of the XML file to be saved.
+     * @param stringWriter A StringWriter containing the XML data to write.
+     * @throws TransformerException If an error occurs during the transformation
+     * process.
+     * @throws IOException
+     */
     private void prettyWriteXmlToFile(String xmlFilePath, StringWriter stringWriter) throws TransformerException, IOException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
@@ -194,6 +218,12 @@ public class XmlManipulatorImpl implements XmlManipulator {
 
     }
 
+    /**
+     * Calculates statistics based on the parsed XML content, including the
+     * number of paragraphs, sentences, words, and distinct words. It also
+     * compares the calculated statistics with those stored in the XML file's
+     * statistics section.
+     */
     @Override
     public void calculateStatistics() {
         int numberOfParagraphs = 0;
@@ -215,7 +245,7 @@ public class XmlManipulatorImpl implements XmlManipulator {
                 }
             }
         }
-        
+
         int numberOfDistinctWords = distinctWords.size();
 
         log.info("Calculated Statistics: Paragraphs={}, Sentences={}, Words={}, DistinctWords={}",
